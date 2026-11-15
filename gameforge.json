@@ -1,0 +1,163 @@
+{
+  "name": "\u68ee\u6797\u5c0f\u9505",
+  "created": "2026-11-15T22:47:06",
+  "assets": [
+    {
+      "name": "pickup",
+      "kind": "sfx",
+      "files": [
+        "assets\\sfx\\pickup_1.wav",
+        "assets\\sfx\\pickup_2.wav",
+        "assets\\sfx\\pickup_3.wav"
+      ],
+      "recipe": {
+        "tool": "forge_sfx",
+        "engine": "synth",
+        "variants": [
+          {
+            "preset": "pickup",
+            "seed": 11,
+            "style": "retro",
+            "variation": 0,
+            "sfxr": {
+              "wave_type": 0,
+              "env_attack": 0.0,
+              "env_sustain": 0.055977238608049595,
+              "env_punch": 0.43969502102993197,
+              "env_decay": 0.46968423360949174,
+              "base_freq": 0.6261897767549094,
+              "freq_limit": 0.0,
+              "freq_ramp": 0.0,
+              "freq_dramp": 0.0,
+              "vib_strength": 0.0,
+              "vib_speed": 0.0,
+              "arp_mod": 0.0,
+              "arp_speed": 0.0,
+              "duty": 0.0,
+              "duty_ramp": 0.0,
+              "repeat_speed": 0.0,
+              "pha_offset": 0.0,
+              "pha_ramp": 0.0,
+              "lpf_freq": 1.0,
+              "lpf_ramp": 0.0,
+              "lpf_resonance": 0.0,
+              "hpf_freq": 0.0,
+              "hpf_ramp": 0.0,
+              "sound_vol": 0.5
+            },
+            "file": "pickup_1.wav",
+            "seconds": 0.507
+          },
+          {
+            "preset": "pickup",
+            "seed": 11,
+            "style": "retro",
+            "variation": 1,
+            "sfxr": {
+              "wave_type": 0,
+              "env_attack": 0.0,
+              "env_sustain": 0.05333325168748754,
+              "env_punch": 0.3914318614474001,
+              "env_decay": 0.4983958865445839,
+              "base_freq": 0.577380127398457,
+              "freq_limit": 0.0,
+              "freq_ramp": 0.02698630430324145,
+              "freq_dramp": 0.013222030100371249,
+              "vib_strength": 0.011529514450160115,
+              "vib_speed": 0.039530701457927,
+              "arp_mod": 0.0,
+              "arp_speed": 0.0,
+              "duty": 0.0,
+              "duty_ramp": 0.011355771904070465,
+              "repeat_speed": 0.026434727448026996,
+              "pha_offset": -0.04134324872164148,
+              "pha_ramp": 0.0,
+              "lpf_freq": 1.0,
+              "lpf_ramp": 0.0,
+              "lpf_resonance": 0.03155797271325124,
+              "hpf_freq": 0.0,
+              "hpf_ramp": 0.0,
+              "sound_vol": 0.5
+            },
+            "file": "pickup_2.wav",
+            "seconds": 0.57
+          },
+          {
+            "preset": "pickup",
+            "seed": 11,
+            "style": "retro",
+            "variation": 2,
+            "sfxr": {
+              "wave_type": 0,
+              "env_attack": 0.0,
+              "env_sustain": 0.055977238608049595,
+              "env_punch": 0.43969502102993197,
+              "env_decay": 0.46968423360949174,
+              "base_freq": 0.6261897767549094,
+              "freq_limit": 0.0002900190844188355,
+              "freq_ramp": -0.0018363187364315997,
+              "freq_dramp": -0.03563875377736565,
+              "vib_strength": 0.0,
+              "vib_speed": 0.0,
+              "arp_mod": 0.03300314453777341,
+              "arp_speed": 0.0,
+              "duty": 0.0,
+              "duty_ramp": 0.030592393112447464,
+              "repeat_speed": 0.0,
+              "pha_offset": 0.0,
+              "pha_ramp": -0.015997943591569995,
+              "lpf_freq": 0.9671762090496018,
+              "lpf_ramp": 0.0,
+              "lpf_resonance": 0.0,
+              "hpf_freq": 0.021397178724434765,
+              "hpf_ramp": 0.0,
+              "sound_vol": 0.5
+            },
+            "file": "pickup_3.wav",
+            "seconds": 0.507
+          }
+        ]
+      },
+      "created": "2026-11-15T22:47:06",
+      "license": "CC0-1.0 (procedurally generated)"
+    },
+    {
+      "name": "forest",
+      "kind": "music",
+      "files": [
+        "assets\\music\\forest.wav",
+        "assets\\music\\forest.mid"
+      ],
+      "recipe": {
+        "tool": "forge_music",
+        "mood": "chill",
+        "style": "chiptune",
+        "seed": 21,
+        "bpm": 84,
+        "bars": 16,
+        "key": "C",
+        "mode": "major",
+        "progression": [
+          0,
+          2,
+          3,
+          5,
+          3,
+          4,
+          2,
+          5,
+          0,
+          2,
+          3,
+          5,
+          3,
+          4,
+          2,
+          5
+        ]
+      },
+      "created": "2026-11-15T22:47:14",
+      "license": "CC0-1.0 (procedurally generated)"
+    }
+  ]
+}

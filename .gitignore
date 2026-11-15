@@ -5,3 +5,6 @@ _shots/
 启动*.vbs
 *.ico
 *.png
+发布前自检.pyw
+同步到GitHub.py
+自检报告.txt

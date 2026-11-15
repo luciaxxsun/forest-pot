@@ -146,6 +146,7 @@
   <div id="ui">
     <div id="hud"></div>
     <div id="topright">
+      <div class="iconbtn" id="btnSound">🔊</div>
       <div class="iconbtn" id="btnWorld">🌍</div>
       <div class="iconbtn" id="btnHelp">？</div>
       <div class="iconbtn" id="btnFull">⛶</div>
@@ -597,6 +598,78 @@ window.addEventListener('resize', resize);
 
 /* ---------------- 声音（很小的电子音，不吵） ---------------- */
 let actx = null;
+
+/* ---------------- 声音：音效 + 每个世界一条背景音乐（素材用 gameforge 生成） ---------------- */
+const SND = {
+  pool: {}, muted: false, musicEl: null, curMusic: '', ready: false,
+  files: {
+    pickup:  ['pickup_1','pickup_2','pickup_3'],
+    blip:    ['blip_1','blip_2'],
+    cookdone:['cookdone_1'],
+    discover:['discover_1'],
+    eat:     ['eat_1','eat_2'],
+    feedgood:['feedgood_1'],
+    feedbad: ['feedbad_1'],
+    levelup: ['levelup_1'],
+    world:   ['world_1'],
+    thief:   ['thief_1']
+  }
+};
+function sndBtn(){
+  const b = document.getElementById('btnSound');
+  if(b) b.textContent = SND.muted ? '🔇' : '🔊';
+}
+function sndInit(){
+  try{
+    SND.muted = localStorage.getItem('fp_muted') === '1';
+    for(const k in SND.files){
+      SND.pool[k] = SND.files[k].map(function(n){
+        const a = new Audio('assets/sfx/' + n + '.wav');
+        a.preload = 'auto'; a.volume = 0.5;
+        return a;
+      });
+    }
+    SND.ready = true;
+  }catch(e){}
+  sndBtn();
+}
+function sfx(name){
+  if(!SND.ready || SND.muted) return;
+  const pool = SND.pool[name];
+  if(!pool || !pool.length) return;
+  try{
+    const src = pool[Math.floor(Math.random() * pool.length)];
+    const a = src.cloneNode();
+    a.volume = src.volume;
+    const pr = a.play();
+    if(pr && pr.catch) pr.catch(function(){});
+  }catch(e){}
+}
+function playMusic(){
+  try{
+    if(SND.muted){ if(SND.musicEl) SND.musicEl.pause(); return; }
+    const want = (typeof BIOME_ID !== 'undefined' && BIOME_ID) ? BIOME_ID : 'forest';
+    if(!SND.musicEl){
+      SND.musicEl = new Audio();
+      SND.musicEl.loop = true;
+      SND.musicEl.volume = 0.22;
+    }
+    if(SND.curMusic !== want){
+      SND.curMusic = want;
+      SND.musicEl.src = 'assets/music/' + want + '.wav';
+    }
+    const pr = SND.musicEl.play();
+    if(pr && pr.catch) pr.catch(function(){});
+  }catch(e){}
+}
+function toggleSound(){
+  SND.muted = !SND.muted;
+  try{ localStorage.setItem('fp_muted', SND.muted ? '1' : '0'); }catch(e){}
+  sndBtn();
+  if(SND.muted){ if(SND.musicEl) SND.musicEl.pause(); }
+  else { playMusic(); sfx('blip'); }
+}
+
 function beep(freq, dur, type, vol){
   try{
     if(!actx) actx = new (window.AudioContext||window.webkitAudioContext)();
@@ -943,7 +1016,7 @@ function updatePickup(){
       it.timer = CFG.REGROW_MIN + Math.random()*(CFG.REGROW_MAX-CFG.REGROW_MIN);
       bag[it.kind]++;
       puff(it.x, it.y-2, ING[it.kind].k==='apple'?'#e5574e':(it.kind==='berry'?'#5b73d6':(it.kind==='flower'?'#ffe08a':'#e05a5a')), 6, 20);
-      beep(660 + ING[it.kind].idx*90, 0.07, 'square', 0.035);
+      sfx('pickup'); beep(660 + ING[it.kind].idx*90, 0.07, 'square', 0.035);
     }
   }
 }
@@ -1081,7 +1154,7 @@ function updateThief(a, dt){
       puff(a.x, a.y-6, '#c8b89a', 6, 16);
       a.carry = null;
       toast('小偷把东西丢下了！', 2, 'good');
-      beep(520, 0.1, 'square', 0.03);
+      sfx('blip'); beep(520, 0.1, 'square', 0.03);
     }
     a.flee = 4;
     a.cool = 8;
@@ -1111,7 +1184,7 @@ function updateThief(a, dt){
     if(d < 20){
       a.carry = pot.items.pop();
       puff(pot.x, pot.y-10, '#ff9ec4', 6, 18);
-      beep(200, 0.14, 'sawtooth', 0.035);
+      sfx('thief'); beep(200, 0.14, 'sawtooth', 0.035);
       toast('锅里的东西被偷走了！', 2, 'bad');
       return;
     }
@@ -1207,19 +1280,19 @@ function feedAnimal(idx){
     a.happy = 0;
     puff(a.x, a.y-8, '#9fd06a', 9, 22);
     toast(sp.name + '吃坏了肚子，缩成一团了…', 2.6, 'bad');
-    beep(180, 0.2, 'sawtooth', 0.045);
+    sfx('feedbad'); beep(180, 0.2, 'sawtooth', 0.045);
   }else if(sp.good.indexOf(kind) >= 0){
     a.sick = 0;
     a.happy = 14;
     a.friend = (a.friend || 0) + 1;
     puff(a.x, a.y-8, '#ff9ec4', 9, 22);
     toast(sp.name + '很喜欢' + ING[kind].name + '！', 2.2, 'good');
-    beep(900, 0.09, 'sine', 0.045);
+    sfx('feedgood'); beep(900, 0.09, 'sine', 0.045);
   }else{
     a.happy = 6;
     puff(a.x, a.y-8, '#ffe08a', 5, 16);
     toast(sp.name + '吃了一点' + ING[kind].name, 1.8);
-    beep(700, 0.07, 'sine', 0.035);
+    sfx('eat'); beep(700, 0.07, 'sine', 0.035);
   }
   feedTarget = null;
   closeFeed();
@@ -1229,7 +1302,7 @@ function openPot(){
   if(pot.cooking) return;
   mode = 'pot';
   renderPotPanel();
-  beep(440, 0.08, 'sine', 0.04);
+  sfx('blip'); beep(440, 0.08, 'sine', 0.04);
 }
 function closePot(){
   mode = 'play';
@@ -1242,7 +1315,7 @@ function addIngredient(idx){
   if(!ing || bag[ing.k] <= 0 || pot.items.length >= 3) return;
   bag[ing.k]--;
   pot.items.push(ing.k);
-  beep(520 + idx*70, 0.08, 'triangle', 0.045);
+  sfx('blip'); beep(520 + idx*70, 0.08, 'triangle', 0.045);
   if(pot.items.length >= 3) startCook();
   else renderPotPanel();
 }
@@ -1255,7 +1328,7 @@ function startCook(){
   pot.cooking = true;
   pot.cookT = CFG.COOK_TIME;
   pot.bubbles = 0;
-  beep(300, 0.14, 'sine', 0.05);
+  sfx('blip'); beep(300, 0.14, 'sine', 0.05);
 }
 
 // 倒掉重来：东西退回背包
@@ -1278,7 +1351,7 @@ function finishCook(){
     curDish = {name:j.name, em:j.em, desc:j.desc, eff:j.eff, isNew:false, junk:true};
   }
   mode = 'dish';
-  beep(880, 0.1, 'square', 0.05);
+  sfx(curDish && curDish.isNew ? 'discover' : 'cookdone'); beep(880, 0.1, 'square', 0.05);
   setTimeout(()=>beep(1180, 0.14, 'square', 0.05), 110);
   showDish();
 }
@@ -1293,7 +1366,7 @@ function eatDish(){
   persist();
   puff(player.x, player.y-6, '#ffe08a', 12, 30);
   curDish = null;
-  beep(760, 0.1, 'sine', 0.05);
+  sfx('eat'); beep(760, 0.1, 'sine', 0.05);
   const next = levelInfo();
   if(next.lv > prev.lv) showLevelUp(prev, next);
   else { mode = 'play'; modalEl.classList.add('hide'); }
@@ -1318,7 +1391,7 @@ function showLevelUp(prev, next){
     '<ul class="tips">' + lines.map(s=>'<li>'+s+'</li>').join('') + '</ul>' +
     '<button data-act="leveldone">继续逛</button>'
   );
-  beep(660, 0.1, 'triangle', 0.05);
+  sfx('levelup'); beep(660, 0.1, 'triangle', 0.05);
   setTimeout(()=>beep(880, 0.12, 'triangle', 0.05), 110);
   setTimeout(()=>beep(1120, 0.16, 'triangle', 0.05), 240);
 }
@@ -1379,6 +1452,8 @@ function switchBiome(id){
   modalEl.classList.add('hide');
   persist();
   toast('来到' + BIOME.name + '了！', 2.4, 'good');
+  sfx('world');
+  if(SND.ready) playMusic();
   beep(520, 0.09, 'triangle', 0.045);
   setTimeout(()=>beep(700, 0.1, 'triangle', 0.04), 90);
 }
@@ -2378,6 +2453,8 @@ function loop(now){
 function startGame(){
   mode = 'play';
   hintT = 9;
+  sndInit();
+  playMusic();
   try{ if(!document.fullscreenElement) toggleFullscreen(); }catch(e){}
   modalEl.classList.add('hide');
   beep(520, 0.09, 'triangle', 0.045);
@@ -2475,6 +2552,8 @@ cv.addEventListener('pointerdown', (e)=>{
 document.getElementById('btnHelp').addEventListener('click', ()=>{ showTitle(); });
 document.getElementById('btnFull').addEventListener('click', ()=>{ toggleFullscreen(); });
 document.getElementById('btnWorld').addEventListener('click', ()=>{ openWorlds(false); });
+document.getElementById('btnSound').addEventListener('click', ()=>{ toggleSound(); });
+document.addEventListener('pointerdown', ()=>{ if(!SND.ready) sndInit(); }, {once:true});
 
 // 触屏方向键
 function bindHold(el, key){
