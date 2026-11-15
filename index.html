@@ -702,6 +702,21 @@ const pot = {x:0, y:0, items:[], cooking:false, cookT:0, bubbles:0, steamT:0};
 let bag = {};
 
 let mode = 'title';          // title | play | pot | dish | book
+
+/* ---------------- 给试玩机器人看的状态（gameforge 的约定） ---------------- */
+const GF = {state:{scene:'title', x:0, y:0, score:0, deaths:0, wins:0, world:'forest', level:1, dish:0},
+            fps:60, events:[],
+            controls:{ start:['Enter',' '],
+                       move:['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','w','a','s','d'],
+                       action:['e'] }};
+window.__gameforge = GF;
+const GF_T0 = performance.now();
+function gfEvent(type, extra){
+  try{
+    GF.events.push(Object.assign({type:type, t:+((performance.now()-GF_T0)/1000).toFixed(1)}, extra||{}));
+    if(GF.events.length > 300) GF.events.splice(0, GF.events.length - 300);
+  }catch(e){}
+}
 let day = CFG.START_DAY;     // 0 = 半夜, 0.25 = 早上, 0.5 = 正午
 let worldTime = 0;
 let tintPurple = 0;
@@ -1007,14 +1022,27 @@ function updatePlayer(dt){
   }
 }
 
+let bagFullHintAt = 0;
 function updatePickup(){
   for(const it of items){
     if(it.taken) continue;
-    if(bag[it.kind] >= bagCap()) continue;
+    if(bag[it.kind] >= bagCap()){
+      // 袋子满了：走到食材上也捡不起来，得说一声，不然像卡住了
+      if(dist2(player.x, player.y, it.x, it.y) < CFG.PICK_R*CFG.PICK_R){
+        const nowS = performance.now()/1000;
+        if(nowS > bagFullHintAt){
+          bagFullHintAt = nowS + 9;
+          toast('袋子满了，先去锅边做道菜吧', 2.4, 'bad');
+          gfEvent('bagfull', {k: it.kind});
+        }
+      }
+      continue;
+    }
     if(dist2(player.x, player.y, it.x, it.y) < CFG.PICK_R*CFG.PICK_R){
       it.taken = true;
       it.timer = CFG.REGROW_MIN + Math.random()*(CFG.REGROW_MAX-CFG.REGROW_MIN);
       bag[it.kind]++;
+      gfEvent('pickup', {k: it.kind, n: bag[it.kind]});
       puff(it.x, it.y-2, ING[it.kind].k==='apple'?'#e5574e':(it.kind==='berry'?'#5b73d6':(it.kind==='flower'?'#ffe08a':'#e05a5a')), 6, 20);
       sfx('pickup'); beep(660 + ING[it.kind].idx*90, 0.07, 'square', 0.035);
     }
@@ -1183,6 +1211,7 @@ function updateThief(a, dt){
     const d = Math.hypot(dx, dy) || 1;
     if(d < 20){
       a.carry = pot.items.pop();
+      gfEvent('thief', {k:a.carry});
       puff(pot.x, pot.y-10, '#ff9ec4', 6, 18);
       sfx('thief'); beep(200, 0.14, 'sawtooth', 0.035);
       toast('锅里的东西被偷走了！', 2, 'bad');
@@ -1278,6 +1307,7 @@ function feedAnimal(idx){
   if(sp.bad.indexOf(kind) >= 0){
     a.sick = 18;
     a.happy = 0;
+    gfEvent('feed', {ok:false, kind:kind, who:a.kind});
     puff(a.x, a.y-8, '#9fd06a', 9, 22);
     toast(sp.name + '吃坏了肚子，缩成一团了…', 2.6, 'bad');
     sfx('feedbad'); beep(180, 0.2, 'sawtooth', 0.045);
@@ -1285,6 +1315,7 @@ function feedAnimal(idx){
     a.sick = 0;
     a.happy = 14;
     a.friend = (a.friend || 0) + 1;
+    gfEvent('feed', {ok:true, kind:kind, who:a.kind});
     puff(a.x, a.y-8, '#ff9ec4', 9, 22);
     toast(sp.name + '很喜欢' + ING[kind].name + '！', 2.2, 'good');
     sfx('feedgood'); beep(900, 0.09, 'sine', 0.045);
@@ -1351,6 +1382,7 @@ function finishCook(){
     curDish = {name:j.name, em:j.em, desc:j.desc, eff:j.eff, isNew:false, junk:true};
   }
   mode = 'dish';
+  gfEvent('cook', {dish: curDish.name, fresh: !!curDish.isNew, junk: !!curDish.junk});
   sfx(curDish && curDish.isNew ? 'discover' : 'cookdone'); beep(880, 0.1, 'square', 0.05);
   setTimeout(()=>beep(1180, 0.14, 'square', 0.05), 110);
   showDish();
@@ -1361,7 +1393,7 @@ function eatDish(){
   applyEffect(curDish.eff);
   const bs = save.biomes[BIOME_ID] || (save.biomes[BIOME_ID] = {discovered:[], cooked:0});
   bs.cooked = (bs.cooked || 0) + 1;
-  if(!curDish.junk && !discovered.has(curDish.name)) discovered.add(curDish.name);
+  if(!curDish.junk && !discovered.has(curDish.name)){ discovered.add(curDish.name); gfEvent('dish', {name: curDish.name}); }
   bs.discovered = Array.from(discovered);
   persist();
   puff(player.x, player.y-6, '#ffe08a', 12, 30);
@@ -1384,6 +1416,7 @@ function showLevelUp(prev, next){
   const news = next.ing.filter(k => prev.ing.indexOf(k) < 0);
   if(news.length) lines.push('新食材：' + news.map(k=>ING[k].em+ING[k].name).join('、'));
   mode = 'levelup';
+  gfEvent('level', {level: next.lv, size: next.w, cap: next.cap});
   showCard(
     '<div class="badge">Lv.'+next.lv+'</div>' +
     '<h2>🍲 厨艺长进了</h2>' +
@@ -2440,12 +2473,22 @@ function update(dt){
 }
 
 let last = performance.now();
+let gfFrames = 0, gfFpsT = 0;
 function loop(now){
   const dt = Math.min(0.05, (now - last)/1000);
   last = now;
   if(!paused) update(dt);
   render();
   updateHud();
+  gfFrames++; gfFpsT += dt;
+  if(gfFpsT >= 0.5){ GF.fps = Math.round(gfFrames/gfFpsT); gfFrames = 0; gfFpsT = 0; }
+  GF.state.scene = mode;
+  GF.state.x = Math.round(player.x);
+  GF.state.y = Math.round(player.y);
+  GF.state.dish = discovered.size;
+  GF.state.score = discovered.size;
+  GF.state.level = levelInfo().lv;
+  GF.state.world = BIOME_ID;
   requestAnimationFrame(loop);
 }
 
@@ -2472,6 +2515,15 @@ window.addEventListener('keydown', (e)=>{
   if(k === 'arrowright' || k === 'd') held.right = true;
 
   if(k === 'f'){ toggleFullscreen(); return; }
+  // 卡片/面板开着的时候，按方向键也能直接走（不然像是卡死了）
+  const DIRK = (k==='arrowup'||k==='w'||k==='arrowdown'||k==='s'||k==='arrowleft'||k==='a'||k==='arrowright'||k==='d');
+  if(DIRK){
+    if(mode === 'feed') closeFeed();
+    else if(mode === 'pot') closePot();
+    else if(mode === 'book') closeBook();
+    else if(mode === 'worlds') closeWorlds();
+    else if(mode === 'levelup') closeLevelUp();
+  }
   if(mode === 'title'){
     if(k !== 'shift' && k !== 'control' && k !== 'alt' && k !== 'meta' && k !== 'f12') startGame();
     return;
@@ -2616,7 +2668,11 @@ window.__act = {
 };
 
 /* ---------------- 启动 ---------------- */
-applyBiome(save.cur || 'forest');
+// 网址后面加 ?w=snow / ?w=sea / ?w=savanna 就能直接进那个世界（方便分享和测试）
+applyBiome((function(){
+  const m = /[?&]w=([a-z]+)/.exec(location.search);
+  return (m && BIOMES[m[1]]) ? m[1] : (save.cur || 'forest');
+})());
 buildWorld();
 resize();
 render();
