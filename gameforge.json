@@ -158,6 +158,184 @@
       },
       "created": "2026-11-15T22:47:14",
       "license": "CC0-1.0 (procedurally generated)"
+    },
+    {
+      "name": "player",
+      "kind": "sprite",
+      "files": [
+        "assets\\sprites\\player.png",
+        "assets\\sprites\\player.json",
+        "assets\\sprites\\player_frames.tres",
+        "assets\\sprites\\player_preview.gif"
+      ],
+      "recipe": {
+        "tool": "forge_sprite",
+        "kind": "character",
+        "seed": 3,
+        "spec": {
+          "hair": "short",
+          "outfit": "tunic",
+          "skin": 1,
+          "hair_hue": "#3a2a1a",
+          "body_hue": "#f2c9a2",
+          "legs_hue": "#4a5a8a",
+          "seed": 3,
+          "extra": {}
+        },
+        "animations": {
+          "idle_down": [
+            0,
+            1
+          ],
+          "walk_down": [
+            2,
+            3,
+            4,
+            5
+          ],
+          "idle_left": [
+            6,
+            7
+          ],
+          "walk_left": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "idle_right": [
+            12,
+            13
+          ],
+          "walk_right": [
+            14,
+            15,
+            16,
+            17
+          ],
+          "idle_up": [
+            18,
+            19
+          ],
+          "walk_up": [
+            20,
+            21,
+            22,
+            23
+          ]
+        },
+        "fps": 8,
+        "frame_size": [
+          16,
+          16
+        ]
+      },
+      "created": "2026-11-16T00:22:48",
+      "license": "CC0-1.0 (procedurally generated)"
+    },
+    {
+      "name": "player_hero",
+      "kind": "sprite",
+      "files": [
+        "assets\\sprites\\player_hero.png",
+        "assets\\sprites\\player_hero.json",
+        "assets\\sprites\\player_hero_frames.tres",
+        "assets\\sprites\\player_hero_preview.gif"
+      ],
+      "recipe": {
+        "tool": "forge_sprite",
+        "kind": "character",
+        "seed": 3,
+        "spec": {
+          "hair": "short",
+          "outfit": "tunic",
+          "skin": 1,
+          "hair_hue": "#2a1a12",
+          "body_hue": "#f2c9a2",
+          "legs_hue": "#39527a",
+          "seed": 3,
+          "extra": {}
+        },
+        "animations": {
+          "idle_down": [
+            0,
+            1
+          ],
+          "walk_down": [
+            2,
+            3,
+            4,
+            5
+          ],
+          "idle_left": [
+            6,
+            7
+          ],
+          "walk_left": [
+            8,
+            9,
+            10,
+            11
+          ],
+          "idle_right": [
+            12,
+            13
+          ],
+          "walk_right": [
+            14,
+            15,
+            16,
+            17
+          ],
+          "idle_up": [
+            18,
+            19
+          ],
+          "walk_up": [
+            20,
+            21,
+            22,
+            23
+          ]
+        },
+        "fps": 8,
+        "frame_size": [
+          16,
+          16
+        ]
+      },
+      "created": "2026-11-16T00:22:55",
+      "license": "CC0-1.0 (procedurally generated)"
+    },
+    {
+      "name": "test_beast",
+      "kind": "sprite",
+      "files": [
+        "assets\\sprites\\test_beast.png",
+        "assets\\sprites\\test_beast.json",
+        "assets\\sprites\\test_beast_frames.tres",
+        "assets\\sprites\\test_beast_preview.gif"
+      ],
+      "recipe": {
+        "tool": "forge_sprite",
+        "kind": "monster",
+        "monster": "beast",
+        "seed": 7,
+        "hue": "#9a7a5a",
+        "animations": {
+          "idle": [
+            0,
+            1
+          ]
+        },
+        "fps": 2,
+        "frame_size": [
+          24,
+          24
+        ]
+      },
+      "created": "2026-11-16T00:23:03",
+      "license": "CC0-1.0 (procedurally generated)"
     }
   ]
 }
